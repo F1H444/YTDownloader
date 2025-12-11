@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useState, useEffect } from "react";
 import { 
   motion, 
@@ -168,8 +169,8 @@ const Navbar = () => {
       >
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-red-600 to-rose-900 shadow-lg shadow-red-900/20">
-            <Youtube className="w-4 h-4 text-white fill-white" />
+          <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-transparent shadow-lg shadow-red-900/20">
+           <Image src="/logo.png" alt="logo" width={24} height={24} />
           </div>
           <span className="text-lg font-bold tracking-tight text-white">
             YTDownloader
@@ -614,7 +615,7 @@ export default function Home() {
                {/* Copyright */}
                <div className="flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity">
                   <div className="p-1.5 rounded-lg bg-white/5">
-                     <Youtube className="w-4 h-4 text-red-500" />
+                     <Image src="/logo.png" alt="logo" width={24} height={24} />
                   </div>
                   <span className="text-sm font-medium text-neutral-400">
                     &copy; 2025 YTDownloader. All rights reserved.
