@@ -1,34 +1,35 @@
 import { NextResponse } from 'next/server';
-import ytdl from '@distube/ytdl-core';
 
-export async function POST(request: Request) {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const fileUrl = searchParams.get('url');
+  const filename = searchParams.get('filename') || 'download.mp4';
+
+  if (!fileUrl) {
+    return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+  }
+
   try {
-    const { url } = await request.json();
-
-    if (!ytdl.validateURL(url)) {
-      return NextResponse.json({ error: 'Invalid YouTube URL' }, { status: 400 });
+    const response = await fetch(fileUrl);
+    
+    if (!response.ok) {
+       console.error(`Download Proxy Failed: ${response.status} ${response.statusText} for URL: ${fileUrl}`);
+       return NextResponse.json({ error: `Failed to download file from YouTube server: ${response.status}` }, { status: 502 });
     }
 
-    const info = await ytdl.getInfo(url);
-    const format = ytdl.chooseFormat(info.formats, { quality: 'highest' });
-    const audioFormat = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
+    const headers = new Headers(response.headers);
+    headers.set('Content-Disposition', `attachment; filename="${filename}"`);
+    
+    // Ensure we don't pass encoding headers that might confuse the browser/Next.js if we are piping raw bytes
+    headers.delete('Content-Encoding');
 
-    // Filter relevant data to send back
-    const data = {
-      title: info.videoDetails.title,
-      author: info.videoDetails.author.name,
-      thumbnails: info.videoDetails.thumbnails,
-      lengthSeconds: info.videoDetails.lengthSeconds,
-      viewCount: info.videoDetails.viewCount,
-      formats: {
-        mp4: format.url, // Note: Direct URLs might have 403 issues on client side without proxy
-        mp3: audioFormat.url
-      }
-    };
+    return new NextResponse(response.body, {
+      status: 200,
+      headers: headers,
+    });
 
-    return NextResponse.json(data);
   } catch (error) {
-    console.error('YTDL Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch video info' }, { status: 500 });
+    console.error('Download Proxy Error:', error);
+    return NextResponse.json({ error: 'Failed to download file' }, { status: 500 });
   }
 }

@@ -5,640 +5,595 @@ import React, { useState, useEffect } from "react";
 import { 
   motion, 
   AnimatePresence, 
-  useScroll, 
-  useTransform,
-  useMotionTemplate,
-  useMotionValue
+  useMotionValue, 
+  useTransform, 
+  useSpring 
 } from "framer-motion";
 import { 
   Download, 
-  Music, 
-  Video, 
-  Youtube, 
   Loader2, 
   ArrowRight, 
   Shield, 
-  Zap, 
-  Sparkles,
-  Link2,
-  AlertCircle,
-  Play,
-  CheckCircle2,
   Globe,
+  Link2,
+  Play,
+  Layers,
   Smartphone,
-  HelpCircle,
-  Menu,
-  X
+  FileAudio,
+  MousePointer2,
+  ChevronDown,
+  Music4,
+  CloudLightning,
+  Sparkles,
+  RefreshCcw,
+  Menu,       
+  X           
 } from "lucide-react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// --- UTILS ---
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- CONSTANTS ---
-const FAQ = [
-  {
-    q: "Is this YouTube Downloader free?",
-    a: "Yes, our tool is 100% free to use. You can download as many videos as you want without any hidden fees or subscription requirements."
-  },
-  {
-    q: "What formats can I download?",
-    a: "We support high-quality MP4 for video and MP3 for audio. You can choose your preferred format before downloading."
-  },
-  {
-    q: "Is it safe to use?",
-    a: "Absolutely. We do not store any user data or downloaded files. The conversion happens in real-time and is secure."
-  },
-  {
-    q: "Does it work on mobile?",
-    a: "Yes! Our website is fully responsive and works perfectly on iPhone, Android, tablets, and desktop computers."
+// --- 3D TILT CARD COMPONENT ---
+function Card3D({ children, className }: { children: React.ReactNode, className?: string }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
+  const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
+
+  function onMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    if (window.innerWidth < 768) return; 
+
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    x.set(clientX - left - width / 2);
+    y.set(clientY - top - height / 2);
   }
-];
 
-const FEATURES = [
-  {
-    icon: Zap,
-    title: "Instant Processing",
-    description: "Our engineered core processes video data in milliseconds.",
-  },
-  {
-    icon: Shield,
-    title: "Privacy First",
-    description: "No logs, no tracking. Your downloads are completely anonymous.",
-  },
-  {
-    icon: Sparkles,
-    title: "Lossless Quality",
-    description: "Preserve the original audio fidelity and video bitrate.",
-  },
-  {
-    icon: Globe,
-    title: "Universal Support",
-    description: "Works with all standard YouTube videos, Shorts, and Live replays."
-  },
-  {
-    icon: Smartphone,
-    title: "Mobile Ready",
-    description: "Optimized experience for touch devices and small screens."
-  },
-  {
-    icon: CheckCircle2,
-    title: "No Registration",
-    description: "Just paste your link and go. No account needed."
+  function onMouseLeave() {
+    x.set(0);
+    y.set(0);
   }
-];
 
-// --- COMPONENTS ---
-
-// 1. Background Mesh
-const BackgroundMesh = () => (
-  <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-[#050505]">
-    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1200px] opacity-30">
-        <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-red-600/20 rounded-full blur-[120px] mix-blend-screen animate-blob" />
-        <div className="absolute top-[20%] right-[-10%] w-[500px] h-[500px] bg-rose-500/10 rounded-full blur-[100px] mix-blend-screen animate-blob animation-delay-2000" />
-        <div className="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-indigo-900/20 rounded-full blur-[120px] mix-blend-screen animate-blob animation-delay-4000" />
-    </div>
-    <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
-  </div>
-);
-
-// 2. Spotlight Card
-const SpotlightCard = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-
-  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
-    const { left, top } = currentTarget.getBoundingClientRect();
-    mouseX.set(clientX - left);
-    mouseY.set(clientY - top);
-  }
+  const rotateX = useTransform(mouseY, [-200, 200], [8, -8]);
+  const rotateY = useTransform(mouseX, [-200, 200], [-8, 8]);
 
   return (
-    <div
-      className={cn(
-        "group relative border border-white/5 bg-white/[0.02] overflow-hidden rounded-3xl",
-        className
-      )}
-      onMouseMove={handleMouseMove}
+    <motion.div
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      className={cn("relative group perspective-1000 w-full", className)}
     >
-      <motion.div
-        className="pointer-events-none absolute -inset-px rounded-3xl opacity-0 transition duration-300 group-hover:opacity-100"
-        style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              650px circle at ${mouseX}px ${mouseY}px,
-              rgba(255,255,255,0.06),
-              transparent 80%
-            )
-          `,
-        }}
+      <div style={{ transform: "translateZ(20px)" }} className="relative z-10 h-full">
+        {children}
+      </div>
+      <div 
+        className="absolute inset-0 z-0 bg-red-600/0 group-hover:bg-red-600/10 blur-3xl transition-colors duration-500 rounded-3xl" 
+        style={{ transform: "translateZ(-30px) scale(0.9)" }}
       />
-      <div className="relative h-full">{children}</div>
-    </div>
+    </motion.div>
   );
-};
+}
 
-// 3. Navbar (Responsive)
-const Navbar = () => {
-  const { scrollY } = useScroll();
+// --- NAVBAR ---
+function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    return scrollY.onChange((latest) => setIsScrolled(latest > 50));
-  }, [scrollY]);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  // Close mobile menu when scrolling significantly
-  useEffect(() => {
-    if(isMobileMenuOpen && isScrolled) setIsMobileMenuOpen(false);
-  }, [isScrolled]);
+  const navLinks = [
+    { name: "Why?", href: "#why-us" },
+    { name: "How To", href: "#how-it-works" },
+    { name: "FAQ", href: "#faq" },
+  ];
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center p-4 md:pt-6 pointer-events-none">
-      <motion.nav 
-        initial={{ y: -20, opacity: 0 }}
+    <>
+      <motion.nav
+        initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className={cn(
-          "pointer-events-auto relative flex items-center justify-between px-6 py-3 rounded-full transition-all duration-300 border border-transparent z-50",
-          (isScrolled || isMobileMenuOpen)
-            ? "bg-[#0A0A0A]/80 backdrop-blur-xl border-white/10 shadow-2xl w-full max-w-2xl" 
-            : "w-full max-w-7xl bg-transparent"
-        )}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed top-4 md:top-6 inset-x-0 z-50 flex justify-center px-4 pointer-events-none"
       >
-        {/* Logo */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-transparent shadow-lg shadow-red-900/20">
-           <Image src="/logo.png" alt="logo" width={24} height={24} />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-white">
-            YTDownloader
-          </span>
-        </div>
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center gap-8">
-          {["Features", "FAQ", "Guide"].map((item) => (
-            <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium text-white/50 hover:text-white transition-colors">
-              {item}
-            </a>
-          ))}
-        </div>
-        
-        {/* Mobile Menu Toggle */}
-        <button 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+        <div 
+          className={cn(
+            "pointer-events-auto w-full max-w-4xl rounded-full transition-all duration-500 ease-out border backdrop-blur-xl flex items-center justify-between py-2 md:py-3 px-4 md:px-6 shadow-2xl",
+            isScrolled || mobileMenuOpen
+              ? "bg-[#0a0a0a]/90 border-white/10 shadow-red-900/10" 
+              : "bg-[#0a0a0a]/60 border-white/5"
+          )}
         >
-            {isMobileMenuOpen ? (
-                <X className="w-5 h-5 text-white" />
-            ) : (
-                <Menu className="w-5 h-5 text-white" />
-            )}
-        </button>
+          {/* Logo */}
+          <div className="flex items-center gap-3 cursor-pointer group">
+            <div className="relative w-8 h-8 md:w-10 md:h-10 overflow-hidden group-hover:scale-105 transition-transform duration-500">
+               <Image 
+                 src="/logo.png" 
+                 alt="Logo" 
+                 width={40} 
+                 height={40} 
+                 className="object-contain w-full h-full"
+               />
+            </div>
+            <span className="text-lg md:text-xl font-bold text-white tracking-tight hidden xs:block">
+              YT<span className="text-red-500">MP3</span>
+            </span>
+          </div>
+
+          {/* Desktop Menu */}
+          <div className="hidden md:flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/5">
+            {navLinks.map((link) => (
+              <a 
+                key={link.name} 
+                href={link.href} 
+                className="px-6 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+
+          {/* Mobile Toggle */}
+          <div className="flex items-center gap-3 md:hidden">
+             <button 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-white bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+             >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+             </button>
+          </div>
+        </div>
       </motion.nav>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
-           <motion.div
-             initial={{ opacity: 0, y: -20, scale: 0.95 }}
-             animate={{ opacity: 1, y: 0, scale: 1 }}
-             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-             transition={{ duration: 0.2 }}
-             className="pointer-events-auto absolute top-[70px] w-[calc(100%-2rem)] max-w-2xl bg-[#0A0A0A]/95 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-2xl md:hidden overflow-hidden z-40"
-           >
-              <div className="flex flex-col gap-2">
-                 {["Features", "FAQ", "Guide"].map((item) => (
-                    <a 
-                      key={item} 
-                      href={`#${item.toLowerCase()}`}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 active:bg-white/15 transition-colors group"
-                    >
-                       <span className="font-medium text-white">{item}</span>
-                       <ArrowRight className="w-4 h-4 text-neutral-500 group-hover:text-white transition-colors" />
-                    </a>
-                 ))}
-              </div>
-           </motion.div>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            className="fixed inset-0 z-40 bg-black/95 backdrop-blur-2xl pt-32 px-6 md:hidden flex flex-col items-center gap-8"
+          >
+             {navLinks.map((link, idx) => (
+               <motion.a
+                  key={link.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * idx }}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-2xl font-bold text-white hover:text-red-500"
+               >
+                 {link.name}
+               </motion.a>
+             ))}
+          </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </>
   );
-};
+}
 
-// 4. Main Page
+// --- VISUALIZER BARS ---
+const VisualizerBars = () => (
+  <div className="flex items-end gap-1.5 h-16 mb-6">
+    {[1, 2, 3, 4, 5].map((i) => (
+      <motion.div
+        key={i}
+        className="w-3 bg-gradient-to-t from-red-600 to-red-400 rounded-t-full shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+        animate={{ height: ["20%", "100%", "40%", "80%", "20%"] }}
+        transition={{ duration: 0.6, repeat: Infinity, repeatType: "mirror", delay: i * 0.1, ease: "easeInOut" }}
+      />
+    ))}
+  </div>
+);
+
+// --- MAIN PAGE ---
 export default function Home() {
   const [url, setUrl] = useState("");
-  const [format, setFormat] = useState<"mp3" | "mp4">("mp4");
-  const [status, setStatus] = useState<"idle" | "fetching" | "ready" | "converting" | "finished" | "error">("idle");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [videoData, setVideoData] = useState<any>(null);
-  const [progress, setProgress] = useState(0);
+  const [error, setError] = useState("");
 
-  // Simulation MOCK DATA for Demo (Since /api/download is not real)
-  const MOCK_DATA = {
-    title: "Lofi Hip Hop Radio - Beats to Relax/Study to",
-    author: "Lofi Girl",
-    viewCount: "54230000",
-    thumbnails: [{ url: "https://i.ytimg.com/vi/jfKfPfyJRdk/maxresdefault.jpg" }],
-    formats: { mp4: "#", mp3: "#" }
-  };
-
-  const handleProcess = async (e: React.FormEvent) => {
+  const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!url.trim()) return;
-    
-    // Basic YouTube regex or includes check
-    if (!url.includes("youtube.com") && !url.includes("youtu.be")) {
-      setStatus("error");
-      setErrorMsg("Please enter a valid YouTube URL (e.g., youtube.com/watch?v=...)");
-      return;
-    }
-
-    setStatus("fetching");
-    setErrorMsg("");
+    setAnalyzing(true);
     setVideoData(null);
+    setError("");
 
-    // SIMULATED FETCH for Demo purposes
-    setTimeout(() => {
-        setVideoData(MOCK_DATA);
-        setStatus("ready");
-    }, 1500);
-
-    /* Real API Call Implementation:
     try {
-      const res = await fetch("/api/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url }),
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
       });
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to fetch video");
+
+      if (!res.ok) throw new Error(data.error || "Gagal menganalisa video");
+
       setVideoData(data);
-      setStatus("ready");
     } catch (err: any) {
-      setStatus("error");
-      setErrorMsg(err.message || "Something went wrong.");
+      setError(err.message);
+      alert(err.message); 
+    } finally {
+      setAnalyzing(false);
     }
-    */
   };
 
-  const handleConvert = () => {
-    setStatus("converting");
-    setProgress(0);
+  const handleConvert = async () => {
+    if (!url) return;
+    setLoading(true);
+    setError("");
 
-    // Simulate conversion progress for UX
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setStatus("finished");
-          return 100;
-        }
-        return prev + Math.random() * 20; 
+    try {
+      // Force MP3
+      const res = await fetch('/api/convert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, format: 'mp3' })
       });
-    }, 200);
-  };
+      
+      const data = await res.json();
 
-  const handleDownloadFile = () => {
-      if (!videoData) return;
-      alert(`Downloading ${format.toUpperCase()} file... (This is a demo)`);
+      if (!res.ok) throw new Error(data.error || "Gagal konversi");
+
+      if (data.url) {
+        // Construct filename for MP3
+        const safeTitle = videoData?.title ? videoData.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50) : 'audio';
+        const filename = `${safeTitle}.mp3`;
+        
+        // Use proxy to force download
+        const downloadUrl = `/api/download?url=${encodeURIComponent(data.url)}&filename=${encodeURIComponent(filename)}`;
+        
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+      } else {
+        throw new Error("Link download tidak ditemukan");
+      }
+    } catch (err: any) {
+      setError(err.message || "Terjadi kesalahan saat download");
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
-    setStatus("idle");
-    setUrl("");
-    setProgress(0);
     setVideoData(null);
+    setUrl("");
   };
 
   return (
-    <div className="min-h-screen font-sans selection:bg-red-500/20 text-white flex flex-col">
-      <BackgroundMesh />
+    <main className="min-h-screen bg-[#020202] text-white font-sans overflow-x-hidden relative selection:bg-red-500/30 selection:text-red-200">
       <Navbar />
 
-      <main className="relative pt-32 md:pt-40 px-6 flex-grow">
-        {/* HERO SECTION */}
-        <div className="max-w-5xl mx-auto flex flex-col items-center text-center">
+      {/* === GLOBAL BACKGROUND (Fixed Grid) === */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f1f1f_1px,transparent_1px),linear-gradient(to_bottom,#1f1f1f_1px,transparent_1px)] bg-[size:30px_30px] md:bg-[size:40px_40px] opacity-20" />
+        <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] md:w-[1000px] h-[600px] bg-red-600/10 rounded-full blur-[100px] md:blur-[150px] animate-pulse" />
+        <div className="absolute bottom-[20%] left-[10%] w-[300px] md:w-[400px] h-[300px] md:h-[400px] bg-red-900/10 rounded-full blur-[80px] md:blur-[100px]" />
+      </div>
+
+      <section className="relative min-h-[95vh] flex flex-col justify-center items-center px-4 md:px-6 pt-32 md:pt-40 pb-20 z-10">
+        <AnimatePresence mode="wait">
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="space-y-6 mb-12 md:mb-16"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/5 bg-white/5 backdrop-blur-md shadow-xl">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-              </span>
-              <span className="text-xs font-medium text-neutral-300 tracking-wide uppercase">System Operational</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-8xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40">
-              Download <br className="hidden md:block"/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-rose-600">YouTube Videos.</span>
-            </h1>
-            
-            <p className="text-base md:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed px-4">
-              Fastest converter with 100% functionality. 
-              Supports MP4, MP3, and more.
-            </p>
-          </motion.div>
-
-          {/* MAIN INTERFACE CARD */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-            className="w-full max-w-3xl z-10"
-          >
-            <div className="relative group rounded-[2rem] p-1 bg-gradient-to-b from-white/10 to-transparent">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-1/2 bg-red-500/20 blur-[80px] -z-10 group-hover:bg-red-500/30 transition-all duration-700" />
-              
-              <div className="bg-[#0A0A0A]/90 backdrop-blur-2xl rounded-[1.8rem] border border-white/5 overflow-hidden shadow-2xl">
-                
-                {/* IDLE / INPUT */}
-                <AnimatePresence mode="wait">
-                  {(status === "idle" || status === "error") && (
-                    <motion.form 
-                      key="input-form"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      onSubmit={handleProcess} 
-                      className="p-3 md:p-4 flex flex-col md:flex-row gap-3 relative"
-                    >
-                      <div className="flex-1 relative group/input">
-                         <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                            <Link2 className="w-5 h-5 text-neutral-500 group-focus-within/input:text-red-500 transition-colors" />
-                         </div>
-                         <input
-                           type="text"
-                           placeholder="Paste YouTube URL..."
-                           value={url}
-                           onChange={(e) => setUrl(e.target.value)}
-                           className="w-full pl-14 pr-4 py-4 md:py-5 bg-white/[0.03] border border-white/5 rounded-2xl text-base md:text-lg text-white placeholder:text-neutral-600 focus:outline-none focus:bg-white/[0.05] focus:border-white/10 transition-all"
-                         />
-                      </div>
-                      <button 
-                        type="submit"
-                        disabled={!url}
-                        className="px-8 py-4 md:py-5 rounded-2xl bg-white text-black font-semibold text-base md:text-lg hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 group/btn"
-                      >
-                         <span>Analyze</span>
-                         <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
-                      </button>
-
-                      {status === "error" && (
-                         <motion.div 
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="absolute -bottom-12 left-4 right-4 md:right-auto md:w-auto flex items-center justify-center md:justify-start gap-2 text-red-400 text-sm font-medium bg-red-900/10 p-2 rounded-lg md:bg-transparent md:p-0"
-                         >
-                            <AlertCircle className="w-4 h-4 shrink-0" /> {errorMsg}
-                         </motion.div>
-                      )}
-                    </motion.form>
-                  )}
-
-                  {/* FETCHING */}
-                  {status === "fetching" && (
-                     <motion.div
-                       key="loader"
-                       initial={{ opacity: 0 }}
-                       animate={{ opacity: 1 }}
-                       exit={{ opacity: 0 }}
-                       className="h-[120px] flex flex-col items-center justify-center gap-4"
-                     >
-                        <Loader2 className="w-8 h-8 text-red-500 animate-spin" />
-                        <span className="text-neutral-500 text-sm animate-pulse">Contacting YouTube Servers...</span>
-                     </motion.div>
-                  )}
-
-                  {/* RESULT */}
-                  {(status === "ready" || status === "converting" || status === "finished") && videoData && (
-                    <motion.div
-                      key="result"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="p-6 md:p-8"
-                    >
-                      <div className="flex flex-col md:flex-row gap-6">
-                        {/* Thumbnail */}
-                        <div className="relative group shrink-0 w-full md:w-64 aspect-video rounded-xl overflow-hidden shadow-lg border border-white/10">
-                          <img 
-                            src={videoData.thumbnails[0].url} 
-                            alt="thumb" 
-                            className="w-full h-full object-cover" 
-                          />
-                        </div>
-
-                        {/* Info & Controls */}
-                        <div className="flex-1 flex flex-col justify-between min-w-0 space-y-4">
-                           <div>
-                              <h3 className="text-xl font-bold text-white truncate leading-tight">{videoData.title}</h3>
-                              <p className="text-neutral-500 text-sm mt-1 flex items-center gap-2">
-                                {videoData.author} • {parseInt(videoData.viewCount).toLocaleString()} Views
-                              </p>
-                           </div>
-
-                           {status === "ready" && (
-                             <div className="flex gap-2">
-                               {["mp4", "mp3"].map((fmt) => (
-                                 <button
-                                   key={fmt}
-                                   onClick={() => setFormat(fmt as "mp4" | "mp3")}
-                                   className={cn(
-                                      "flex-1 py-3 px-4 rounded-xl text-sm font-medium border transition-all flex items-center justify-center gap-2",
-                                      format === fmt 
-                                        ? "bg-white text-black border-white shadow-lg shadow-white/10 scale-[1.02]" 
-                                        : "bg-transparent text-neutral-400 border-white/10 hover:border-white/30 hover:text-white"
-                                   )}
-                                 >
-                                    {fmt === "mp4" ? <Video className="w-4 h-4" /> : <Music className="w-4 h-4" />}
-                                    {fmt.toUpperCase()}
-                                 </button>
-                               ))}
-                             </div>
-                           )}
-
-                           {status === "converting" && (
-                              <div className="space-y-2">
-                                 <div className="flex justify-between text-xs font-medium text-neutral-400">
-                                    <span>Processing...</span>
-                                    <span>{Math.round(progress)}%</span>
-                                 </div>
-                                 <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                    <motion.div 
-                                      className="h-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
-                                      initial={{ width: 0 }}
-                                      animate={{ width: `${progress}%` }}
-                                      transition={{ type: "spring", stiffness: 50 }}
-                                    />
-                                 </div>
-                              </div>
-                           )}
-
-                           {status === "finished" && (
-                              <motion.button 
-                                onClick={handleDownloadFile}
-                                initial={{ scale: 0.9, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="w-full py-4 rounded-xl bg-green-500 hover:bg-green-400 text-black font-bold flex items-center justify-center gap-2 transition-colors shadow-lg shadow-green-500/20"
-                              >
-                                 <Download className="w-5 h-5" /> Download {format.toUpperCase()}
-                              </motion.button>
-                           )}
-                        </div>
-                      </div>
-
-                      <div className="mt-6 pt-6 border-t border-white/5 flex justify-between items-center">
-                         <button onClick={handleReset} className="text-sm text-neutral-500 hover:text-white transition-colors">
-                            Convert another
-                         </button>
-                         {status === "ready" && (
-                           <button 
-                             onClick={handleConvert}
-                             className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white text-sm font-bold rounded-lg transition-all shadow-lg shadow-red-900/20"
-                           >
-                              Start Conversion
-                           </button>
-                         )}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* EXTRA INFO */}
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-            className="mt-8 text-sm text-neutral-500"
-          >
-            By using this tool, you accept our Terms of Service.
-          </motion.p>
-        </div>
-
-        {/* FEATURES */}
-        <div id="features" className="max-w-7xl mx-auto mt-32 md:mt-40">
-           <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">Why use our downloader?</h2>
-           </div>
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {FEATURES.map((feature, i) => (
-                 <motion.div
-                   key={i}
-                   initial={{ opacity: 0, y: 20 }}
-                   whileInView={{ opacity: 1, y: 0 }}
-                   viewport={{ once: true }}
-                   transition={{ delay: i * 0.1 }}
-                 >
-                   <SpotlightCard className="p-6 md:p-8 h-full flex flex-col items-start hover:border-white/10 transition-colors">
-                      <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6 border border-white/5">
-                         <feature.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
-                      <p className="text-neutral-400 leading-relaxed text-sm">
-                        {feature.description}
-                      </p>
-                   </SpotlightCard>
-                 </motion.div>
-              ))}
-           </div>
-        </div>
-
-        {/* FAQ SECTION */}
-        <div id="faq" className="max-w-3xl mx-auto mt-32 md:mt-40">
-           <div className="text-center mb-12 md:mb-16">
-              <h2 className="text-2xl md:text-3xl font-bold text-white">Frequently Asked Questions</h2>
-              <p className="text-neutral-500 mt-2 text-sm md:text-base">Everything you need to know about the service.</p>
-           </div>
-           
-           <div className="space-y-4">
-              {FAQ.map((item, i) => (
-                <div key={i} className="rounded-2xl border border-white/5 bg-white/[0.02] p-6 hover:bg-white/[0.04] transition-colors">
-                   <h3 className="text-base md:text-lg font-semibold text-white mb-2 flex items-center gap-3">
-                     <HelpCircle className="w-5 h-5 text-neutral-600 shrink-0" />
-                     {item.q}
-                   </h3>
-                   <p className="text-neutral-400 text-sm leading-relaxed pl-8">
-                     {item.a}
-                   </p>
-                </div>
-              ))}
-           </div>
-        </div>
-
-        {/* GUIDE / STEPS */}
-        <div id="guide" className="max-w-7xl mx-auto mt-32 md:mt-40 mb-20">
-            <div className="rounded-[2.5rem] bg-[#0A0A0A] border border-white/5 p-8 md:p-16 text-center relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-red-900/10 to-transparent pointer-events-none" />
-                
-                <h2 className="text-2xl md:text-4xl font-bold text-white mb-12 relative z-10">Start Downloading Now</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 relative z-10">
-                   {[
-                      { step: "01", title: "Copy & Paste", desc: "Get the link from YouTube" },
-                      { step: "02", title: "Select Format", desc: "Choose MP3 or MP4" },
-                      { step: "03", title: "Download", desc: "Enjoy your content" }
-                   ].map((item, i) => (
-                      <div key={i} className="flex flex-col items-center">
-                         <div className="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6 text-xl font-bold font-mono shadow-lg shadow-white/5">
-                            {item.step}
-                         </div>
-                         <h4 className="text-xl font-bold text-white mb-2">{item.title}</h4>
-                         <p className="text-neutral-500 text-sm">{item.desc}</p>
-                      </div>
-                   ))}
-                </div>
-            </div>
-        </div>
-
-      </main>
-
-      {/* FOOTER */}
-      <footer className="w-full border-t border-white/5 bg-black py-8 relative overflow-hidden mt-auto">
-         {/* Top Accent Line */}
-         <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-red-600/50 to-transparent opacity-50" />
-         
-         <div className="max-w-7xl mx-auto px-6 h-full">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6 h-full">
-               
-               {/* Copyright */}
-               <div className="flex items-center gap-3 opacity-60 hover:opacity-100 transition-opacity">
-                  <div className="p-1.5 rounded-lg bg-white/5">
-                     <Image src="/logo.png" alt="logo" width={24} height={24} />
-                  </div>
-                  <span className="text-sm font-medium text-neutral-400">
-                    &copy; 2025 YTDownloader. All rights reserved.
-                  </span>
-               </div>
-
-               {/* CTA */}
-               <button 
-                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                 className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 transition-all"
+          {/* STATE 1: HERO SECTION */}
+          {!videoData ? (
+            <motion.div
+               key="hero-section"
+               initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+               animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+               exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)", transition: { duration: 0.5 } }}
+               transition={{ duration: 0.8, ease: "easeOut" }}
+               className="relative text-center w-full max-w-5xl mx-auto"
+            >
+               {/* Version Badge */}
+               <motion.div 
+                 initial={{ scale: 0, rotate: -10 }}
+                 animate={{ scale: 1, rotate: 0 }}
+                 transition={{ delay: 0.3, type: "spring" }}
+                 className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-1.5 rounded-full border border-red-500/30 bg-red-950/20 text-red-400 text-[10px] md:text-xs font-bold uppercase tracking-wider mb-6 md:mb-8 backdrop-blur-md shadow-[0_0_20px_rgba(220,38,38,0.2)]"
                >
-                  <span className="text-sm font-semibold text-white group-hover:text-red-400 transition-colors">
-                    Download Now
-                  </span>
-                  <ArrowRight className="w-4 h-4 text-neutral-500 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all" />
-               </button>
+                 <Sparkles className="w-3 h-3 text-red-500 animate-pulse" />
+                 Premium Audio Quality
+               </motion.div>
+               
+               {/* Title */}
+               <h1 className="text-5xl sm:text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter mb-6 md:mb-8 text-white relative z-10 leading-[0.9]">
+                 Youtube <br className="hidden md:block" />
+                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-400 to-red-600 bg-[length:200%_auto] animate-[gradient_3s_linear_infinite]">
+                   TO MP3
+                 </span>
+               </h1>
+               
+               <p className="text-base sm:text-lg md:text-2xl text-gray-400 max-w-xl md:max-w-2xl mx-auto mb-10 md:mb-16 leading-relaxed font-light px-2">
+                 The ultimate converter for music lovers. Extract <span className="text-white font-semibold">320kbps Audio</span> from any video directly in your browser.
+               </p>
 
-            </div>
-         </div>
+               {/* SEARCH CONSOLE */}
+               <div className="w-full max-w-3xl mx-auto relative group perspective-1000 z-50 px-2 md:px-0">
+                 {/* Glow Behind Input */}
+                 <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-orange-600 to-red-600 rounded-full opacity-40 blur-2xl group-hover:opacity-60 transition duration-500 animate-tilt hidden md:block" />
+                 
+                 <form 
+                   onSubmit={handleAnalyze} 
+                   className="relative flex flex-col md:flex-row items-center bg-[#0a0a0a] border border-white/10 rounded-2xl md:rounded-full p-2 shadow-2xl transition-transform duration-300 group-hover:scale-[1.01]"
+                 >
+                   <div className="hidden md:block pl-6 text-gray-500">
+                      <Link2 className="w-6 h-6 group-focus-within:text-red-500 transition-colors" />
+                   </div>
+                   
+                   <input 
+                     type="text" 
+                     placeholder="Paste YouTube Link Here..." 
+                     className="flex-1 bg-transparent border-none outline-none text-white px-4 py-4 md:px-6 placeholder:text-gray-600 font-medium text-base md:text-lg text-center md:text-left w-full h-full"
+                     value={url}
+                     onChange={(e) => setUrl(e.target.value)}
+                     spellCheck={false}
+                   />
+                   
+                   <button 
+                     type="submit"
+                     disabled={analyzing || !url}
+                     className="w-full md:w-auto h-12 md:h-14 px-8 rounded-xl md:rounded-full bg-red-600 hover:bg-red-500 text-white font-bold transition-all disabled:opacity-50 disabled:grayscale flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(220,38,38,0.4)] active:scale-95"
+                   >
+                     {analyzing ? (
+                       <> <Loader2 className="w-5 h-5 animate-spin" /> <span className="hidden md:inline">Processing</span> </>
+                     ) : (
+                       <> <span className="hidden md:inline">Convert</span> <ArrowRight className="w-5 h-5" /> </>
+                     )}
+                   </button>
+                 </form>
+               </div>
+            </motion.div>
+          ) : (
+            
+            /* STATE 2: RESULT SECTION */
+            <motion.div 
+               key="result-section"
+               initial={{ opacity: 0, y: 100, scale: 0.9 }}
+               animate={{ opacity: 1, y: 0, scale: 1 }}
+               exit={{ opacity: 0, y: 100, scale: 0.9, transition: { duration: 0.3 } }}
+               transition={{ type: "spring", bounce: 0.4 }}
+               className="bg-black/60 backdrop-blur-2xl border border-white/10 rounded-3xl md:rounded-[2.5rem] p-6 md:p-12 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden group w-full max-w-5xl mx-4"
+            >
+               {/* Decoration Lines */}
+               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-600 to-transparent opacity-50" />
+               
+               <div className="flex flex-col md:flex-row gap-8 lg:gap-12 relative z-10 items-start">
+                 {/* Image Area */}
+                 <div className="w-full md:w-[320px] shrink-0">
+                    <Card3D className="w-full">
+                       <div className="aspect-square rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl relative group border border-white/10 w-full">
+                         <img 
+                           src={videoData.thumbnails[0]?.url} 
+                           alt={videoData.title} 
+                           className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700 filter brightness-90 group-hover:brightness-100" 
+                         />
+                         <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/10 transition-all">
+                             <div className="w-16 h-16 md:w-20 md:h-20 bg-red-600/90 rounded-full flex items-center justify-center shadow-[0_0_30px_red] scale-90 group-hover:scale-110 transition-all duration-300">
+                                <Music4 className="w-6 h-6 md:w-8 md:h-8 text-white fill-current ml-1" />
+                             </div>
+                         </div>
+                       </div>
+                    </Card3D>
+                 </div>
+
+                 {/* Info Area */}
+                 <div className="flex-1 flex flex-col w-full justify-center">
+                   <div className="flex flex-col-reverse md:flex-row md:items-center justify-between gap-4 mb-4">
+                       <span className="self-start bg-red-500/10 text-red-400 px-3 py-1 md:px-4 md:py-1.5 rounded-full text-[10px] md:text-xs font-bold border border-red-500/20 tracking-wider">AUDIO READY</span>
+                       
+                       <button 
+                          onClick={handleReset}
+                          className="text-gray-500 hover:text-white flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors self-end md:self-auto"
+                       >
+                          <RefreshCcw className="w-3 h-3" />
+                          Convert Another
+                       </button>
+                   </div>
+
+                   <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight mb-4 line-clamp-2">
+                     {videoData.title}
+                   </h2>
+                   
+                   <div className="flex flex-wrap items-center gap-4 md:gap-6 text-gray-400 mb-8 border-b border-white/5 pb-8">
+                      <span className="flex items-center gap-2 text-sm"><MousePointer2 className="w-4 h-4 text-red-500" /> {videoData.author}</span>
+                   </div>
+
+                   <div className="flex flex-col gap-3">
+                     <button 
+                       onClick={handleConvert}
+                       disabled={loading}
+                       className="group relative w-full overflow-hidden bg-red-600 hover:bg-red-500 text-white font-black py-5 rounded-xl md:rounded-2xl shadow-[0_0_40px_rgba(220,38,38,0.3)] active:scale-[0.99] transition-all flex items-center justify-center gap-3 text-lg border border-red-400/20"
+                     >
+                       <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover:animate-[shimmer_1.5s_infinite]" />
+                       {loading ? (
+                         <> <Loader2 className="w-5 h-5 md:w-6 md:h-6 animate-spin" /> DOWNLOADING... </>
+                       ) : (
+                         <> <Download className="w-5 h-5 md:w-6 md:h-6 group-hover:translate-y-1 transition-transform" /> DOWNLOAD MP3 </>
+                       )}
+                     </button>
+                     <p className="text-center text-xs text-gray-500 mt-2 font-medium">Highest Quality Available (up to 320kbps)</p>
+                   </div>
+                 </div>
+               </div>
+            </motion.div>
+          )}
+
+        </AnimatePresence>
+      </section>
+
+      {/* --- WHY CHOOSE US (Cinematic Bento) --- */}
+      <section id="why-us" className="py-20 md:py-32 px-4 md:px-6 relative z-10">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="text-center mb-16 md:mb-24">
+            <h2 className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-6 tracking-tight">
+              Why <span className="text-transparent bg-clip-text bg-gradient-to-b from-red-500 to-red-900"><br className="md:hidden" />Youtube MP3</span>?
+            </h2>
+            <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto px-4">
+              Pure audio focus. We extract exactly what you want to hear, without the video bloat.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 md:gap-6 auto-rows-[minmax(250px,auto)] md:auto-rows-[minmax(280px,auto)]">
+            
+            {/* Card 1: Features */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="lg:col-span-8 p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] bg-zinc-900/40 border border-white/5 backdrop-blur-xl hover:border-red-500/40 hover:bg-zinc-900/60 transition-all duration-500 group relative overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              <div className="relative z-10 flex flex-col h-full justify-between gap-8 md:gap-0">
+                <div>
+                     <div className="w-12 h-12 md:w-16 md:h-16 bg-red-600/10 rounded-2xl flex items-center justify-center mb-6 md:mb-8 border border-red-500/20 group-hover:bg-red-600 group-hover:border-red-600 transition-all duration-500">
+                       <FileAudio className="w-6 h-6 md:w-8 md:h-8 text-red-500 group-hover:text-white transition-colors" />
+                     </div>
+                     <h3 className="text-2xl md:text-4xl font-bold text-white mb-4">Dedicated Audio Engine</h3>
+                     <p className="text-gray-400 text-base md:text-lg leading-relaxed max-w-xl">
+                       Our converter is optimized for audio extraction only. We don't just "rip" the audio; we process it to ensure the <span className="text-white font-semibold">highest possible fidelity</span> and correct metadata.
+                     </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Card 2: Audio Vis */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="lg:col-span-4 p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] bg-zinc-900/40 border border-white/5 backdrop-blur-xl hover:border-red-500/40 transition-all duration-500 flex flex-col justify-end group overflow-hidden relative min-h-[250px]"
+            >
+              <div className="absolute top-0 right-0 p-32 bg-red-600/10 rounded-full blur-[80px] -mr-16 -mt-16 pointer-events-none" />
+              <Music4 className="w-8 h-8 md:w-10 md:h-10 text-red-500 mb-auto" />
+              <VisualizerBars />
+              <h3 className="text-xl md:text-2xl font-bold text-white mb-2">High Bitrate</h3>
+              <p className="text-sm md:text-base text-gray-400">Guaranteed <span className="text-red-500 font-bold">128-320kbps</span> quality for every track.</p>
+            </motion.div>
+
+             {/* Card 3: Cloud */}
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="lg:col-span-12 p-6 md:p-10 rounded-3xl md:rounded-[2.5rem] bg-zinc-900/40 border border-white/5 backdrop-blur-xl hover:border-red-500/40 transition-all duration-500 group flex flex-col md:flex-row items-center gap-8 relative overflow-hidden"
+            >
+              <div className="flex-1 relative z-10 order-2 md:order-1 text-center md:text-left">
+                <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 flex items-center justify-center md:justify-start gap-3">
+                  <CloudLightning className="w-6 h-6 md:w-8 md:h-8 text-red-500" />
+                  Instant Cloud Processing
+                </h3>
+                <p className="text-gray-400 text-base md:text-lg leading-relaxed">
+                   <span className="text-white">Music without waiting.</span> Our servers handle the conversion in milliseconds, saving your data and battery life.
+                </p>
+              </div>
+              
+              <div className="relative order-1 md:order-2 w-full md:w-1/3 h-32 md:h-full flex items-center justify-center">
+                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border border-red-500/20 flex items-center justify-center animate-[spin_10s_linear_infinite]">
+                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-full border border-red-500/40 flex items-center justify-center animate-[spin_5s_linear_infinite_reverse]">
+                       <div className="w-3 h-3 md:w-4 md:h-4 bg-red-500 rounded-full shadow-[0_0_20px_red]" />
+                    </div>
+                 </div>
+              </div>
+            </motion.div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* HOW IT WORKS */}
+      <section id="how-it-works" className="py-20 md:py-24 px-4 md:px-6 relative z-10">
+        <div className="max-w-7xl mx-auto">
+           <div className="text-center mb-12 md:mb-16">
+             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">How To Download MP3</h2>
+             <p className="text-gray-500">From YouTube to Music Player in seconds.</p>
+           </div>
+           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+             {[
+               { i: "01", title: "Copy Link", desc: "Copy the YouTube video or music URL." },
+               { i: "02", title: "Paste Here", desc: "Paste it above and hit Convert." },
+               { i: "03", title: "Get Audio", desc: "The MP3 will start downloading immediately." }
+             ].map((step, idx) => (
+               <div key={idx} className="p-6 md:p-8 rounded-3xl bg-[#0a0a0a]/60 backdrop-blur-md border border-white/5 hover:border-red-600/50 hover:-translate-y-2 transition-all duration-300 text-center group">
+                  <div className="text-4xl md:text-5xl font-black text-white/5 mb-4 md:mb-6 group-hover:text-red-600/20 transition-colors">{step.i}</div>
+                  <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
+                  <p className="text-gray-500 text-sm md:text-base">{step.desc}</p>
+               </div>
+             ))}
+           </div>
+        </div>
+      </section>
+
+      {/* FAQ SECTION */}
+      <section id="faq" className="py-20 md:py-24 px-4 md:px-6 relative z-10 mb-20">
+        <div className="max-w-3xl mx-auto">
+           <h2 className="text-3xl md:text-4xl font-black text-white mb-12 text-center">FAQ</h2>
+           <div className="flex flex-col gap-4">
+             {[
+               { q: "Is it really free?", a: "Yes, 100% free. Enjoy unlimited MP3 downloads." },
+               { q: "Can I download from iPhones?", a: "Yes. Use Safari and the MP3 will save to your files." },
+               { q: "What is the sound quality?", a: "We convert at the highest bitrate provided by the source, up to 320kbps." }
+             ].map((item, idx) => (
+               <details key={idx} className="group border border-white/10 rounded-2xl bg-[#0a0a0a]/80 backdrop-blur-md overflow-hidden transition-all duration-300 open:bg-zinc-900/80 open:border-red-500/30">
+                 <summary className="flex items-center justify-between p-5 md:p-6 cursor-pointer list-none">
+                    <h3 className="font-bold text-white text-base md:text-lg group-hover:text-red-400 transition-colors">{item.q}</h3>
+                    <ChevronDown className="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" />
+                 </summary>
+                 <div className="px-6 pb-6 pt-0 text-sm md:text-base text-gray-400 border-t border-white/5 mt-2 mx-6">
+                    <div className="pt-4">{item.a}</div>
+                 </div>
+               </details>
+             ))}
+           </div>
+        </div>
+      </section>
+
+      {/* === FOOTER === */}
+      <footer className="relative z-50 bg-black border-t border-white/10 pt-20 pb-12 px-6">
+         {/* Top Horizon Glow Effect */}
+         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-red-600 shadow-[0_0_100px_rgba(220,38,38,1)]" />
          
-         {/* Bottom Glow */}
-         <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-[500px] h-[100px] bg-red-600/20 blur-[80px] pointer-events-none" />
+         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+           <div className="flex flex-col gap-4 text-center md:text-left">
+              <div className="flex items-center justify-center md:justify-start gap-3">
+                  <div className="relative w-8 h-8 rounded-lg overflow-hidden">
+                     <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
+                  </div>
+                  <span className="font-bold text-white text-2xl tracking-tight">YT<span className="text-red-600">MP3</span></span>
+              </div>
+           </div>
+
+           <div className="flex gap-8 text-sm font-semibold text-gray-500">
+             <a href="#" className="hover:text-white transition-colors">Terms</a>
+             <a href="#" className="hover:text-white transition-colors">Privacy</a>
+             <a href="#" className="hover:text-white transition-colors">Contact</a>
+           </div>
+
+           <div className="text-sm text-gray-700 font-medium">
+             © 2025 YTMP3 Inc.
+           </div>
+         </div>
       </footer>
-    </div>
+    </main>
   );
 }
