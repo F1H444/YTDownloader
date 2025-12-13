@@ -1,11 +1,18 @@
 <div align="center">
+  
+  <div style="background: linear-gradient(to right, #991b1b, #dc2626, #991b1b); padding: 2px; border-radius: 20px; display: inline-block;">
+    <div style="background: #000; padding: 20px; border-radius: 18px;">
+      <h1 style="color: white; font-weight: 900; letter-spacing: -2px; font-size: 3rem; margin: 0;">
+        YouTube <span style="color: #ef4444;">Downloader</span>
+      </h1>
+    </div>
+  </div>
 
-  <h1 align="center">YTDownloader</h1>
+  <br />
+  <br />
 
   <p align="center">
-    <strong>Konversi & Download Video YouTube dengan Gaya Modern</strong>
-    <br />
-    Cepat · Aman · Responsif · Tanpa Iklan
+    <strong>Strictly engineered for speed. Convert YouTube to MP3 & MP4 without limits.</strong>
   </p>
 
   <p align="center">
@@ -13,87 +20,70 @@
       <img src="https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
     </a>
     <a href="https://tailwindcss.com">
-      <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+      <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
     </a>
     <a href="https://www.framer.com/motion/">
       <img src="https://img.shields.io/badge/Framer_Motion-Animation-0055FF?style=for-the-badge&logo=framer&logoColor=white" alt="Framer Motion" />
     </a>
-    <a href="https://www.typescriptlang.org/">
-      <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <a href="https://github.com/yt-dlp/yt-dlp">
+      <img src="https://img.shields.io/badge/Backend-yt--dlp-ff0000?style=for-the-badge&logo=youtube&logoColor=white" alt="yt-dlp" />
     </a>
   </p>
 
   <br />
-
-  <img width="1919" height="934" alt="Screenshot 2025-12-11 125139" src="https://github.com/user-attachments/assets/cea1a361-ebe1-47ea-b183-8ab0e29502c4" />
-
-  
-
-  <br />
-  <br />
-
 </div>
 
-## ✨ Tentang Proyek
+---
 
-**YTDownloader** adalah aplikasi web modern yang dirancang untuk memudahkan pengguna mengunduh video dan audio dari YouTube. Dibangun dengan fokus pada **User Interface (UI)** yang elegan dan **User Experience (UX)** yang mulus.
+## ⚡ Overview
 
-Proyek ini tidak hanya sekadar alat, tetapi juga sebuah eksplorasi desain web modern menggunakan efek *Glassmorphism*, *Aurora Backgrounds*, dan animasi interaktif yang halus.
+**YouTube Downloader** adalah aplikasi web modern beraliran *Brutalist Design* yang memanfaatkan kekuatan server-side rendering Next.js untuk mengekstrak video dan audio dari YouTube. 
 
-## 🚀 Fitur Unggulan
+Tidak seperti downloader biasa yang penuh iklan, proyek ini fokus pada **UI/UX Premium**, animasi fluid, dan privasi pengguna.
 
-| Fitur | Deskripsi |
-| :--- | :--- |
-| 🎨 **Ultra Modern UI** | Desain gelap (Dark Mode) dengan estetika *clean*, efek *glow*, dan tipografi yang rapi. |
-| ⚡ **Performa Tinggi** | Dibangun di atas Next.js 15 App Router untuk kecepatan loading yang maksimal. |
-| 📱 **Responsif Penuh** | Tampilan sempurna di Desktop, Tablet, hingga Mobile (disertai Hamburger Menu). |
-| 🎭 **Animasi Fluid** | Interaksi yang hidup berkat `Framer Motion` (micro-interactions, page transitions). |
-| 🔒 **Privasi Terjaga** | Tidak ada penyimpanan log pengguna. Proses konversi berjalan *real-time*. |
-| 🛠️ **Tanpa Login** | Langsung gunakan tanpa perlu registrasi atau pengaturan akun yang rumit. |
+### 📸 Preview
 
-## 🛠️ Teknologi yang Digunakan
+<img width="1919" height="1079" alt="Screenshot 2025-12-13 221849" src="https://github.com/user-attachments/assets/c819eeed-6a77-4051-b5b8-e9319a8bdfc1" />
 
-* **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
-* **Bahasa:** [TypeScript](https://www.typescriptlang.org/)
-* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-* **Animasi:** [Framer Motion](https://www.framer.com/motion/)
+---
+
+## 🚀 Fitur Utama
+
+| Fitur | Deskripsi | Status |
+| :--- | :--- | :---: |
+| **Floating Island Navbar** | Navigasi modern dengan efek *glassmorphism* dan menu mobile responsif. | ✅ |
+| **3D Tilt Cards** | Kartu hasil pencarian interaktif yang bergerak mengikuti mouse (Desktop). | ✅ |
+| **Server-Side Extraction** | Menggunakan `yt-dlp` di sisi server untuk menghindari limitasi browser/CORS. | ✅ |
+| **Proxy Download** | Rute API khusus untuk memaksa download file (`content-disposition`) tanpa membuka tab baru. | ✅ |
+| **Format Support** | Mendukung konversi ke **MP3 (Audio)** dan **MP4 (Video)** kualitas tinggi. | ✅ |
+| **Tailwind v4** | Menggunakan engine CSS terbaru untuk performa styling maksimal. | ✅ |
+
+---
+
+## 🛠️ Tech Stack
+
+Project ini dibangun menggunakan teknologi terkini:
+
+* **Frontend:** [Next.js 15 (App Router)](https://nextjs.org/)
+* **Language:** [TypeScript](https://www.typescriptlang.org/)
+* **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+* **Animations:** [Framer Motion](https://www.framer.com/motion/)
 * **Icons:** [Lucide React](https://lucide.dev/)
-* **Utils:** `clsx` & `tailwind-merge` untuk manajemen class dinamis.
+* **Backend Logic:** * `youtube-dl-exec` (Wrapper untuk yt-dlp)
+    * `execa` (Process execution)
 
-## 📦 Instalasi & Menjalankan Lokal
+---
 
-Ikuti langkah-langkah ini untuk menjalankan proyek di komputer Anda:
+## 📦 Instalasi & Cara Menjalankan
 
-1.  **Clone repositori ini:**
-    ```bash
-    git clone [https://github.com/username-anda/ytdownloader.git](https://github.com/username-anda/ytdownloader.git)
-    cd ytdownloader
-    ```
+Ikuti langkah ini untuk menjalankan project di lokal komputer Anda:
 
-2.  **Instal dependensi:**
-    ```bash
-    npm install
-    # atau
-    yarn install
-    # atau
-    pnpm install
-    ```
+### 1. Prasyarat
+Pastikan Anda sudah menginstal:
+* **Node.js** (v18+)
+* **Python** (Wajib diperlukan oleh `yt-dlp` untuk bekerja di background system).
 
-3.  **Jalankan server pengembangan:**
-    ```bash
-    npm run dev
-    ```
-
-4.  Buka browser dan akses [http://localhost:3000](http://localhost:3000).
-
-## 📂 Struktur Proyek
-
+### 2. Clone Repository
 ```bash
-.
-├── app/              # Source code utama (Next.js App Router)
-│   ├── api/          # API Routes (Backend logic/Mock)
-│   ├── layout.tsx    # Root layout
-│   └── page.tsx      # Halaman utama (Frontend logic)
-├── public/           # Aset statis (Gambar, Icon, SVG)
-├── components/       # Komponen UI (Navbar, Footer, Cards)
-└── ...
+git clone [https://github.com/username-anda/ytdownloader.git](https://github.com/username-anda/ytdownloader.git)
+cd ytdownloader
